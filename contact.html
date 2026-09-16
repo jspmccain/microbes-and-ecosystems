@@ -47,77 +47,28 @@
 
     <section class="section">
       <div class="container">
-        <div class="grid grid-2" style="gap:56px; align-items:start;">
-          <div>
-            <div class="card" style="padding:32px; margin-bottom:24px;">
-              <div class="info-row">
-                <div class="icon">✉️</div>
-                <div>
-                  <h4>Email</h4>
-                  <p><a href="mailto:lab@example.edu">lab@example.edu</a></p>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="icon">📍</div>
-                <div>
-                  <h4>Address</h4>
-                  <p>Department of Ecology and Evolutionary Biology<br />University of Toronto<br />[Building Name], Room [XXX]<br />Toronto, ON [Postal Code]</p>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="icon">☎️</div>
-                <div>
-                  <h4>Phone</h4>
-                  <p>[Phone Number]</p>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="icon">🔗</div>
-                <div>
-                  <h4>Elsewhere</h4>
-                  <p><a href="#">Google Scholar</a> · <a href="#">Twitter/X</a> · <a href="#">GitHub</a></p>
-                </div>
+        <div style="max-width:560px; margin:0 auto;">
+          <div class="card" style="padding:32px; margin-bottom:24px;">
+            <div class="info-row">
+              <div class="icon">✉️</div>
+              <div>
+                <h4>Email</h4>
+                <p><code>s.mccain[fruit]utoronto.ca</code> (where [fruit] = @)</p>
               </div>
             </div>
-
-            <div class="map-placeholder">
-              Map placeholder — embed a Google Maps iframe or campus map here once you have a real address.
+            <div class="info-row">
+              <div class="icon">📍</div>
+              <div>
+                <h4>Address</h4>
+                <p>University of Toronto<br />Department of Ecology and Evolutionary Biology</p>
+              </div>
             </div>
-          </div>
-
-          <div>
-            <div class="card" style="padding:32px;">
-              <h3 style="margin-bottom:6px;">Send us a message</h3>
-              <p style="font-size:0.9rem; margin-bottom:22px;">
-                This form isn't wired to a backend yet — see the README for connecting it to a service like
-                Formspree or Netlify Forms, or replace it with a plain <code>mailto:</code> link.
-              </p>
-              <!--
-                To make this form functional without a backend of your own, sign up for a free
-                service like Formspree (https://formspree.io) or, if hosting on Netlify, enable
-                Netlify Forms and set action="/" data-netlify="true" name="contact" on this <form>.
-              -->
-              <form class="contact-form" action="#" method="POST">
-                <div class="form-row-2">
-                  <div class="field">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" required />
-                  </div>
-                  <div class="field">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required />
-                  </div>
-                </div>
-                <div class="field">
-                  <label for="subject">Subject</label>
-                  <input type="text" id="subject" name="subject" placeholder="e.g. Graduate program inquiry" />
-                </div>
-                <div class="field">
-                  <label for="message">Message</label>
-                  <textarea id="message" name="message" rows="6" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="justify-self:start;">Send Message</button>
-              </form>
+            <div class="info-row">
+              <div class="icon">🔗</div>
+              <div>
+                <h4>Elsewhere</h4>
+                <p><a href="#">Google Scholar</a> · <a href="#">Twitter/X</a> · <a href="#">GitHub</a></p>
+              </div>
             </div>
           </div>
         </div>
