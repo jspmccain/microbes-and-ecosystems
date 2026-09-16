@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Microbes &amp; Ecosystems Lab — [University Name]</title>
+  <meta name="description" content="The Microbes & Ecosystems Lab studies how microbial life shapes ecosystems from the deep ocean to the human gut, currently grounded in aquatic ecosystems, water quality, and groundwater." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%233ee8d0%22/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <canvas id="boids-bg" aria-hidden="true"></canvas>
+
+  <div class="page-content">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-brand">
+          <span class="dot"></span>
+          <span>
+            Microbes &amp; Ecosystems Lab
+            <span class="sub">[University Name]</span>
+          </span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="research.html">Research</a>
+          <a href="people.html">People</a>
+          <a href="publications.html">Publications</a>
+          <a href="news.html">News</a>
+          <a href="join.html">Join Us</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero container">
+      <div class="hero-badges">
+        <span class="tag cyan">Aquatic Ecosystems</span>
+        <span class="tag green">Water Quality</span>
+        <span class="tag">Groundwater</span>
+      </div>
+      <h1>We study the invisible engineers of ecosystems.</h1>
+      <p class="lede">
+        The Microbes &amp; Ecosystems Lab investigates how microbial communities shape the ecosystems around
+        us — from the deep ocean to the human gut. Right now, our own fieldwork is grounded closer to home:
+        aquatic ecosystems, water quality, and groundwater.
+      </p>
+      <div class="btn-row" style="justify-content:center;">
+        <a href="research.html" class="btn btn-primary">Explore Our Research</a>
+        <a href="join.html" class="btn btn-ghost">Join the Lab</a>
+      </div>
+      <div class="scroll-cue">
+        <span>Scroll</span>
+        <span class="line"></span>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">What we work on</span>
+          <h2>Microbes shape ecosystems everywhere. Here's where we're digging in.</h2>
+          <p>
+            The lab's broader interest is how microbial life shapes ecosystems anywhere it's found — from the
+            deep ocean to the human gut. Today, that curiosity is grounded in three connected areas of the
+            water systems around us.
+          </p>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="card-icon">🌊</div>
+            <h3>Aquatic Ecosystems</h3>
+            <p>How microbial communities structure energy flow, nutrient cycling, and food webs across lakes, rivers, and coastal systems.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">💧</div>
+            <h3>Water Quality</h3>
+            <p>Linking microbial activity to real-world water quality outcomes — harmful blooms, contaminant cycling, and ecosystem health.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🪨</div>
+            <h3>Groundwater</h3>
+            <p>Microbial communities in aquifers that degrade contaminants and shape the water we pump out of the ground.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="stats-strip">
+          <div class="stat">
+            <h3>12</h3>
+            <span>Active Lab Members</span>
+          </div>
+          <div class="stat">
+            <h3>[XX]</h3>
+            <span>Peer-Reviewed Papers</span>
+          </div>
+          <div class="stat">
+            <h3>[X]</h3>
+            <span>Active Grants</span>
+          </div>
+          <div class="stat">
+            <h3>[X]</h3>
+            <span>Field Sites</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Recent news</span>
+          <h2>What's happening in the lab</h2>
+        </div>
+        <div class="grid grid-3">
+          <div class="card">
+            <span class="tag cyan" style="margin-bottom:14px;">Publication</span>
+            <h3>New paper on microbial diversity in freshwater sediments</h3>
+            <p>Our latest study reveals how sediment microbial communities respond to seasonal nutrient pulses. Read the full story on the News page.</p>
+          </div>
+          <div class="card">
+            <span class="tag magenta" style="margin-bottom:14px;">Funding</span>
+            <h3>Lab awarded new grant to study harmful algal blooms</h3>
+            <p>A three-year award will support fieldwork and molecular analysis of bloom-forming cyanobacteria across regional lakes.</p>
+          </div>
+          <div class="card">
+            <span class="tag green" style="margin-bottom:14px;">People</span>
+            <h3>Welcoming two new graduate students</h3>
+            <p>We're excited to welcome new members to the lab this semester, joining projects in groundwater microbiology and water quality.</p>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:36px; justify-content:center;">
+          <a href="news.html" class="btn btn-ghost">View All News</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta-band">
+          <span class="eyebrow" style="justify-content:center;">Get involved</span>
+          <h2>Curious how microbes hold ecosystems together?</h2>
+          <p>We're always looking for curious, motivated students and collaborators who want to work across scales — from genes to watersheds.</p>
+          <div class="btn-row">
+            <a href="join.html" class="btn btn-primary">See Open Positions</a>
+            <a href="contact.html" class="btn btn-ghost">Get in Touch</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <h4>Microbes &amp; Ecosystems Lab</h4>
+            <p style="max-width:340px; font-size:0.9rem;">
+              Department of [Department Name], [University Name].<br />
+              Studying how microbial life shapes ecosystems, from the deep ocean to the human gut — currently
+              grounded in aquatic ecosystems, water quality, and groundwater.
+            </p>
+          </div>
+          <div>
+            <h4>Site</h4>
+            <a href="research.html">Research</a>
+            <a href="people.html">People</a>
+            <a href="publications.html">Publications</a>
+            <a href="news.html">News</a>
+          </div>
+          <div>
+            <h4>Connect</h4>
+            <a href="join.html">Join Us</a>
+            <a href="contact.html">Contact</a>
+            <a href="mailto:lab@example.edu">lab@example.edu</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; <span data-year></span> Microbes &amp; Ecosystems Lab. All rights reserved.</span>
+          <span>[University Name] · [Department Name]</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/boids.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

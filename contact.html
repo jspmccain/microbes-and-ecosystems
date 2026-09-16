@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Microbes &amp; Ecosystems Lab</title>
+  <meta name="description" content="Get in touch with the Microbes & Ecosystems Lab." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%233ee8d0%22/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <canvas id="boids-bg" aria-hidden="true"></canvas>
+
+  <div class="page-content">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-brand">
+          <span class="dot"></span>
+          <span>
+            Microbes &amp; Ecosystems Lab
+            <span class="sub">[University Name]</span>
+          </span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="research.html">Research</a>
+          <a href="people.html">People</a>
+          <a href="publications.html">Publications</a>
+          <a href="news.html">News</a>
+          <a href="join.html">Join Us</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="page-header container">
+      <span class="eyebrow">Contact</span>
+      <h1>Get in touch.</h1>
+      <p>Questions about our research, interested in joining, or want to collaborate? We'd love to hear from you.</p>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="grid grid-2" style="gap:56px; align-items:start;">
+          <div>
+            <div class="card" style="padding:32px; margin-bottom:24px;">
+              <div class="info-row">
+                <div class="icon">✉️</div>
+                <div>
+                  <h4>Email</h4>
+                  <p><a href="mailto:lab@example.edu">lab@example.edu</a></p>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="icon">📍</div>
+                <div>
+                  <h4>Address</h4>
+                  <p>[Department Name]<br />[University Name]<br />[Building Name], Room [XXX]<br />[City, State ZIP]</p>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="icon">☎️</div>
+                <div>
+                  <h4>Phone</h4>
+                  <p>[Phone Number]</p>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="icon">🔗</div>
+                <div>
+                  <h4>Elsewhere</h4>
+                  <p><a href="#">Google Scholar</a> · <a href="#">Twitter/X</a> · <a href="#">GitHub</a></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="map-placeholder">
+              Map placeholder — embed a Google Maps iframe or campus map here once you have a real address.
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="padding:32px;">
+              <h3 style="margin-bottom:6px;">Send us a message</h3>
+              <p style="font-size:0.9rem; margin-bottom:22px;">
+                This form isn't wired to a backend yet — see the README for connecting it to a service like
+                Formspree or Netlify Forms, or replace it with a plain <code>mailto:</code> link.
+              </p>
+              <!--
+                To make this form functional without a backend of your own, sign up for a free
+                service like Formspree (https://formspree.io) or, if hosting on Netlify, enable
+                Netlify Forms and set action="/" data-netlify="true" name="contact" on this <form>.
+              -->
+              <form class="contact-form" action="#" method="POST">
+                <div class="form-row-2">
+                  <div class="field">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required />
+                  </div>
+                  <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="subject">Subject</label>
+                  <input type="text" id="subject" name="subject" placeholder="e.g. Graduate program inquiry" />
+                </div>
+                <div class="field">
+                  <label for="message">Message</label>
+                  <textarea id="message" name="message" rows="6" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="justify-self:start;">Send Message</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <h4>Microbes &amp; Ecosystems Lab</h4>
+            <p style="max-width:340px; font-size:0.9rem;">
+              Department of [Department Name], [University Name].<br />
+              Studying how microbial life shapes ecosystems, from the deep ocean to the human gut — currently
+              grounded in aquatic ecosystems, water quality, and groundwater.
+            </p>
+          </div>
+          <div>
+            <h4>Site</h4>
+            <a href="research.html">Research</a>
+            <a href="people.html">People</a>
+            <a href="publications.html">Publications</a>
+            <a href="news.html">News</a>
+          </div>
+          <div>
+            <h4>Connect</h4>
+            <a href="join.html">Join Us</a>
+            <a href="contact.html">Contact</a>
+            <a href="mailto:lab@example.edu">lab@example.edu</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; <span data-year></span> Microbes &amp; Ecosystems Lab. All rights reserved.</span>
+          <span>[University Name] · [Department Name]</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/boids.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
