@@ -24,27 +24,16 @@ lab-website/
 
 ## 1. Replace the placeholders
 
-Every page has bracketed placeholder text like `[PI Name]`, `[University
-Name]`, `[Department Name]`, `[City, State ZIP]`, and `lab@example.edu`.
-The fastest way to fill these in is a find-and-replace across all `.html`
-files. From inside the `lab-website` folder:
+`[University Name]` and `[Department Name]` are already filled in
+(University of Toronto / Department of Ecology and Evolutionary Biology,
+across every page's nav subtitle and footer). The PI, Dr. Scott McCain, is
+named on the People page only (see note below). What's left:
 
-```bash
-# macOS / Linux example — repeat for each placeholder
-find . -name "*.html" -exec sed -i '' 's/\[University Name\]/Your University/g' {} +
-find . -name "*.html" -exec sed -i '' 's/\[Department Name\]/Department of Biology/g' {} +
-find . -name "*.html" -exec sed -i '' 's/lab@example.edu/yourlab@youruniversity.edu/g' {} +
-```
-
-(Drop the `''` after `-i` if you're on Linux/GNU sed.)
-
-Placeholders to look for:
-- `[PI Name]` / `[PI Last Name]` — the PI's real name, in **people.html**,
-  **publications.html**, **contact.html**, and the footers.
-- `[University Name]`, `[Department Name]` — appear in every page's nav
-  subtitle and footer.
-- `[Building Name]`, `[City, State ZIP]`, `[Phone Number]` — **contact.html**.
-- `lab@example.edu` — used throughout as the contact email.
+- `[Field]`, `[Institution]` (x2) — PI's Ph.D./postdoc details, in the
+  bio on **people.html**.
+- `[Building Name]`, `[Postal Code]`, `[Phone Number]` — **contact.html**.
+- `lab@example.edu` — used throughout as the contact email; swap for a
+  real address whenever one's ready.
 - The **People** page roster (Dr. Maya Kessler, Jordan Lee, etc.) is
   entirely sample content — replace with your actual lab members. Each
   person is a `.person-card` in `people.html`; copy/paste the block and
@@ -55,6 +44,18 @@ Placeholders to look for:
   your real publication list, or see "Publications from a data file" below.
 - The **News** page entries are sample posts — replace with real updates
   as they happen; newest should go at the top.
+
+For any remaining find-and-replace across all pages at once:
+
+```bash
+# macOS: keep the '' after -i; Linux/GNU sed: drop it
+find . -name "*.html" -exec sed -i '' 's/lab@example.edu/yourlab@youruniversity.edu/g' {} +
+```
+
+**Note on the PI's name**: by request, the PI's name (Dr. Scott McCain)
+appears **only on the People page** — the Publications page intentionally
+omits it, so every citation just ends in "et al." instead of naming the
+PI next to nearly every entry.
 
 ## 2. Preview it locally
 
