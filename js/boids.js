@@ -1,14 +1,14 @@
 /* ==========================================================================
-   Boids — flowing current swarm for the site background.
+   Flow field — monochrome particle current for the site background.
 
-   Classic Reynolds flocking (separation / alignment / cohesion), but each
-   boid is rendered as a short, curved ribbon trail — built from a smoothed
-   history of its recent positions — that fades from a soft head to
-   nothing at the tail, rather than a glowing dot or a straight streak.
-   Reads as drifting, organic current lines / bioluminescent plankton
-   trails. Organized into a few loose "schools" by color, each with a
-   little per-boid hue variation, so it reads as several small currents
-   rather than one uniform blob.
+   A large swarm of tiny particles drift through a smoothly-evolving 3D
+   Perlin noise field (x, y, time), each particle's heading pulled from the
+   field at its own position. Trails accumulate via a low-alpha black
+   fill each frame rather than being drawn as discrete shapes, which is the
+   classic flow-field look: soft, ribbon-like white lines braiding across a
+   black canvas. The mouse acts as a local vortex — particles near the
+   cursor get pulled into a swirl that blends smoothly back into the
+   ambient field as they move away from it.
    ========================================================================== */
 
 (function () {
@@ -24,24 +24,59 @@
   var width = 0;
   var height = 0;
 
-  var SCHOOLS = [
-    { color: [62, 232, 208] }, // cyan
-    { color: [255, 95, 209] }, // magenta
-    { color: [167, 139, 250] }, // violet
-    { color: [124, 255, 178] } // green
-  ];
+  // ---- Classic 3D Perlin noise (Ken Perlin's reference algorithm) --------
+  // Self-contained so the site keeps zero external dependencies. The
+  // permutation table is shuffled once per page load for a fresh field
+  // each visit.
+  var perm = new Uint8Array(512);
+  (function initPerlin() {
+    var p = new Uint8Array(256);
+    for (var i = 0; i < 256; i++) p[i] = i;
+    for (var i = 255; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = p[i]; p[i] = p[j]; p[j] = tmp;
+    }
+    for (var i = 0; i < 512; i++) perm[i] = p[i & 255];
+  })();
 
-  var HISTORY_LEN = 12;
+  function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  function lerp(t, a, b) { return a + t * (b - a); }
+  function grad(hash, x, y, z) {
+    var h = hash & 15;
+    var u = h < 8 ? x : y;
+    var v = h < 4 ? y : (h === 12 || h === 14 ? x : z);
+    return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+  }
 
-  var boids = [];
-  var mouse = { x: null, y: null, active: false };
-  var lastFrame = 0;
+  function noise3(x, y, z) {
+    var X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+    x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
+    var u = fade(x), v = fade(y), w = fade(z);
+    var A = perm[X] + Y, AA = perm[A] + Z, AB = perm[A + 1] + Z;
+    var B = perm[X + 1] + Y, BA = perm[B] + Z, BB = perm[B + 1] + Z;
+    return lerp(w,
+      lerp(v,
+        lerp(u, grad(perm[AA], x, y, z), grad(perm[BA], x - 1, y, z)),
+        lerp(u, grad(perm[AB], x, y - 1, z), grad(perm[BB], x - 1, y - 1, z))),
+      lerp(v,
+        lerp(u, grad(perm[AA + 1], x, y, z - 1), grad(perm[BA + 1], x - 1, y, z - 1)),
+        lerp(u, grad(perm[AB + 1], x, y - 1, z - 1), grad(perm[BB + 1], x - 1, y - 1, z - 1))));
+  }
+  // -------------------------------------------------------------------------
+
+  var NOISE_SCALE = 0.0028;
+  var TIME_SCALE = 0.00018;
+  var ANGLE_MULT = Math.PI * 4.2;
+
+  var particles = [];
+  var mouse = { x: 0, y: 0, active: false };
+  var t = 0;
   var running = true;
 
-  function boidCount() {
+  function particleCount() {
     var area = window.innerWidth * window.innerHeight;
-    var n = Math.round(area / 22000);
-    return Math.max(24, Math.min(n, 90));
+    var n = Math.round(area / 9000);
+    return Math.max(160, Math.min(n, 620));
   }
 
   function resize() {
@@ -54,260 +89,127 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
 
-  function clamp255(v) {
-    return Math.max(0, Math.min(255, v));
+  function Particle() {
+    this.reset(true);
   }
 
-  // Nudge a school's base color a little per-boid so the swarm reads as
-  // many related-but-distinct hues rather than four flat, identical colors.
-  function jitterColor(base) {
-    var jitter = 22;
-    return [
-      clamp255(Math.round(base[0] + (Math.random() - 0.5) * jitter)),
-      clamp255(Math.round(base[1] + (Math.random() - 0.5) * jitter)),
-      clamp255(Math.round(base[2] + (Math.random() - 0.5) * jitter))
-    ].join(", ");
-  }
-
-  function Boid(schoolIndex) {
-    this.school = schoolIndex;
-    this.color = jitterColor(SCHOOLS[schoolIndex].color);
+  Particle.prototype.reset = function (initial) {
     this.x = Math.random() * width;
     this.y = Math.random() * height;
-    var angle = Math.random() * Math.PI * 2;
-    var speed = 0.4 + Math.random() * 0.5;
-    this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed;
-    this.size = 1.4 + Math.random() * 2.2;
-    this.depth = 0.4 + Math.random() * 0.6; // affects opacity/size for parallax
-    this.wobble1 = Math.random() * Math.PI * 2;
-    this.wobble2 = Math.random() * Math.PI * 2;
-    this.history = [{ x: this.x, y: this.y }];
+    this.prevX = this.x;
+    this.prevY = this.y;
+    this.vx = 0;
+    this.vy = 0;
+    this.speed = 0.5 + Math.random() * 1.1;
+    this.alpha = 0.12 + Math.random() * 0.28;
+    this.width = 0.5 + Math.random() * 0.9;
+    this.age = 0;
+    this.life = 260 + Math.random() * 420;
+    if (initial) this.age = Math.random() * this.life;
+  };
+
+  function initParticles() {
+    particles = [];
+    var count = reduceMotion ? Math.round(particleCount() * 0.35) : particleCount();
+    for (var i = 0; i < count; i++) particles.push(new Particle());
   }
 
-  function initBoids() {
-    boids = [];
-    var count = reduceMotion ? Math.round(boidCount() * 0.4) : boidCount();
-    for (var i = 0; i < count; i++) {
-      boids.push(new Boid(i % SCHOOLS.length));
-    }
+  var MARGIN = 20;
+
+  function fieldAngle(x, y) {
+    var n = noise3(x * NOISE_SCALE, y * NOISE_SCALE, t);
+    return n * ANGLE_MULT;
   }
 
-  function wrap(b) {
-    var margin = 40;
-    var wrapped = false;
-    if (b.x < -margin) { b.x = width + margin; wrapped = true; }
-    if (b.x > width + margin) { b.x = -margin; wrapped = true; }
-    if (b.y < -margin) { b.y = height + margin; wrapped = true; }
-    if (b.y > height + margin) { b.y = -margin; wrapped = true; }
-    // Reset the trail on wrap so it doesn't draw a line clear across the
-    // screen when a boid re-enters on the opposite edge.
-    if (wrapped) b.history = [{ x: b.x, y: b.y }];
-  }
+  function step(p) {
+    var angle = fieldAngle(p.x, p.y);
+    var tx = Math.cos(angle);
+    var ty = Math.sin(angle);
 
-  var NEIGHBOR_RADIUS = 90;
-  var SEPARATION_RADIUS = 26;
-  var MAX_SPEED = 1.15;
-  var MAX_FORCE = 0.045;
-
-  function limit(vx, vy, max) {
-    var mag = Math.sqrt(vx * vx + vy * vy);
-    if (mag > max) {
-      return [(vx / mag) * max, (vy / mag) * max];
-    }
-    return [vx, vy];
-  }
-
-  function step(b, neighbors) {
-    var sepX = 0, sepY = 0;
-    var aliX = 0, aliY = 0;
-    var cohX = 0, cohY = 0;
-    var count = 0;
-
-    for (var i = 0; i < neighbors.length; i++) {
-      var other = neighbors[i];
-      if (other === b) continue;
-      var dx = b.x - other.x;
-      var dy = b.y - other.y;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist > 0 && dist < NEIGHBOR_RADIUS && other.school === b.school) {
-        count++;
-        aliX += other.vx;
-        aliY += other.vy;
-        cohX += other.x;
-        cohY += other.y;
-        if (dist < SEPARATION_RADIUS) {
-          sepX += dx / dist;
-          sepY += dy / dist;
-        }
-      }
-    }
-
-    var ax = 0, ay = 0;
-
-    if (count > 0) {
-      aliX /= count;
-      aliY /= count;
-      var aliRes = limit(aliX - b.vx, aliY - b.vy, MAX_FORCE);
-      ax += aliRes[0] * 1.0;
-      ay += aliRes[1] * 1.0;
-
-      cohX = cohX / count - b.x;
-      cohY = cohY / count - b.y;
-      var cohRes = limit(cohX, cohY, MAX_FORCE);
-      ax += cohRes[0] * 0.9;
-      ay += cohRes[1] * 0.9;
-    }
-
-    var sepRes = limit(sepX, sepY, MAX_FORCE);
-    ax += sepRes[0] * 1.6;
-    ay += sepRes[1] * 1.6;
-
-    // Gentle cursor interaction: nearby boids drift away from the pointer,
-    // like plankton scattering from a disturbance.
+    // Mouse vortex: within range, blend the ambient field direction toward
+    // a tangential (swirling) direction around the cursor. Weight falls
+    // off smoothly with distance so it melts back into the ambient flow.
     if (mouse.active) {
-      var mdx = b.x - mouse.x;
-      var mdy = b.y - mouse.y;
-      var mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-      if (mdist < 140 && mdist > 0) {
-        var force = (140 - mdist) / 140 * 0.06;
-        ax += (mdx / mdist) * force;
-        ay += (mdy / mdist) * force;
+      var dx = p.x - mouse.x;
+      var dy = p.y - mouse.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      var radius = 220;
+      if (dist < radius && dist > 0.001) {
+        var w = 1 - dist / radius;
+        w = w * w;
+        var swirlX = -dy / dist;
+        var swirlY = dx / dist;
+        // slight inward pull mixed with the tangential swirl so particles
+        // arc around the cursor rather than just brushing past it.
+        var pullX = -dx / dist;
+        var pullY = -dy / dist;
+        var sx = swirlX * 0.82 + pullX * 0.18;
+        var sy = swirlY * 0.82 + pullY * 0.18;
+        var bx = tx * (1 - w) + sx * w;
+        var by = ty * (1 - w) + sy * w;
+        var bl = Math.sqrt(bx * bx + by * by) || 1;
+        tx = bx / bl;
+        ty = by / bl;
       }
     }
 
-    // Layered, out-of-phase wander (two frequencies per axis) so paths
-    // curve and loop unpredictably over time instead of tracing a simple
-    // single-sine wiggle — reads as organic drifting rather than mechanical.
-    b.wobble1 += 0.011;
-    b.wobble2 += 0.0037;
-    ax += (Math.sin(b.wobble1) * 0.65 + Math.sin(b.wobble2 * 1.7) * 0.35) * 0.0045;
-    ay += (Math.cos(b.wobble1 * 0.8) * 0.65 + Math.cos(b.wobble2 * 1.3) * 0.35) * 0.0045;
+    var targetVx = tx * p.speed;
+    var targetVy = ty * p.speed;
+    p.vx += (targetVx - p.vx) * 0.11;
+    p.vy += (targetVy - p.vy) * 0.11;
 
-    b.vx += ax;
-    b.vy += ay;
-    var v = limit(b.vx, b.vy, MAX_SPEED * (0.7 + b.depth * 0.6));
-    b.vx = v[0];
-    b.vy = v[1];
+    p.prevX = p.x;
+    p.prevY = p.y;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.age++;
 
-    b.x += b.vx;
-    b.y += b.vy;
-    wrap(b);
-
-    b.history.unshift({ x: b.x, y: b.y });
-    if (b.history.length > HISTORY_LEN) b.history.length = HISTORY_LEN;
-  }
-
-  // Simple spatial grid to keep neighbor lookups cheap at higher counts.
-  function buildGrid() {
-    var cell = NEIGHBOR_RADIUS;
-    var grid = {};
-    var cols = Math.ceil(width / cell) + 1;
-    for (var i = 0; i < boids.length; i++) {
-      var b = boids[i];
-      var cx = Math.floor(b.x / cell);
-      var cy = Math.floor(b.y / cell);
-      var key = cx + cols * cy;
-      if (!grid[key]) grid[key] = [];
-      grid[key].push(b);
+    if (
+      p.age > p.life ||
+      p.x < -MARGIN || p.x > width + MARGIN ||
+      p.y < -MARGIN || p.y > height + MARGIN
+    ) {
+      p.reset(false);
     }
-    return { grid: grid, cell: cell, cols: cols };
-  }
-
-  function neighborsFor(b, gridInfo) {
-    var cell = gridInfo.cell;
-    var cols = gridInfo.cols;
-    var cx = Math.floor(b.x / cell);
-    var cy = Math.floor(b.y / cell);
-    var result = [];
-    for (var ox = -1; ox <= 1; ox++) {
-      for (var oy = -1; oy <= 1; oy++) {
-        var key = (cx + ox) + cols * (cy + oy);
-        var bucket = gridInfo.grid[key];
-        if (bucket) {
-          for (var i = 0; i < bucket.length; i++) result.push(bucket[i]);
-        }
-      }
-    }
-    return result;
-  }
-
-  // Draw one boid's trail as a smoothed curve through its recent positions,
-  // using a gradient stroke that fades from a soft head to fully
-  // transparent at the tail — curvy and organic, with no hard edges.
-  function drawTrail(b) {
-    var h = b.history;
-    if (h.length < 2) return;
-
-    var headAlpha = 0.22 + b.depth * 0.3;
-    var lineWidth = b.size * (0.55 + b.depth * 0.35);
-    var head = h[0];
-    var tail = h[h.length - 1];
-
-    var grad = ctx.createLinearGradient(head.x, head.y, tail.x, tail.y);
-    grad.addColorStop(0, "rgba(" + b.color + ", " + headAlpha + ")");
-    grad.addColorStop(1, "rgba(" + b.color + ", 0)");
-
-    ctx.beginPath();
-    ctx.moveTo(head.x, head.y);
-    if (h.length === 2) {
-      ctx.lineTo(tail.x, tail.y);
-    } else {
-      for (var i = 1; i < h.length - 1; i++) {
-        var xc = (h[i].x + h[i + 1].x) / 2;
-        var yc = (h[i].y + h[i + 1].y) / 2;
-        ctx.quadraticCurveTo(h[i].x, h[i].y, xc, yc);
-      }
-      ctx.lineTo(tail.x, tail.y);
-    }
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = lineWidth;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.shadowColor = "rgba(" + b.color + ", " + headAlpha * 0.6 + ")";
-    ctx.shadowBlur = 1 + b.depth * 1.5;
-    ctx.stroke();
-
-    // A tiny brighter core at the head — like a faint bioluminescent spark
-    // where the organism actually is, above the fading wake behind it.
-    ctx.beginPath();
-    ctx.fillStyle = "rgba(" + b.color + ", " + Math.min(headAlpha * 1.4, 0.85) + ")";
-    ctx.arc(head.x, head.y, lineWidth * 0.55, 0, Math.PI * 2);
-    ctx.fill();
   }
 
   function draw() {
-    // Trailing fade instead of a hard clear, so old frames dissolve away
-    // gradually rather than popping.
-    ctx.fillStyle = "rgba(5, 11, 20, 0.24)";
+    // Low-alpha black fill instead of a hard clear — trails accumulate and
+    // dissolve gradually, the signature flow-field look.
+    ctx.fillStyle = "rgba(0, 0, 0, 0.07)";
     ctx.fillRect(0, 0, width, height);
 
-    var gridInfo = buildGrid();
-
-    for (var i = 0; i < boids.length; i++) {
-      var b = boids[i];
-      var neighbors = neighborsFor(b, gridInfo);
-      if (!reduceMotion) step(b, neighbors);
-      drawTrail(b);
+    ctx.lineCap = "round";
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      if (!reduceMotion) step(p);
+      var dx = p.x - p.prevX;
+      var dy = p.y - p.prevY;
+      // Skip drawing the long jump that happens the frame a particle
+      // respawns, so resets don't draw a stray line across the screen.
+      if (Math.sqrt(dx * dx + dy * dy) > 30) continue;
+      ctx.strokeStyle = "rgba(255, 255, 255, " + p.alpha + ")";
+      ctx.lineWidth = p.width;
+      ctx.beginPath();
+      ctx.moveTo(p.prevX, p.prevY);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
     }
-    ctx.shadowBlur = 0;
+
+    t += TIME_SCALE * 60;
   }
 
-  function loop(ts) {
+  function loop() {
     if (!running) return;
     if (!reduceMotion) {
       draw();
-    } else if (lastFrame === 0) {
-      // Draw a single static frame for reduced-motion users, then stop.
-      ctx.fillStyle = "rgba(5, 11, 20, 1)";
+      requestAnimationFrame(loop);
+    } else {
+      // Single static-ish frame for reduced-motion users, then stop.
+      ctx.fillStyle = "rgba(0, 0, 0, 1)";
       ctx.fillRect(0, 0, width, height);
       draw();
-      lastFrame = ts || 1;
-      return;
-    } else {
-      return;
     }
-    requestAnimationFrame(loop);
   }
 
   function onMouseMove(e) {
@@ -327,12 +229,12 @@
 
   function onResize() {
     resize();
-    initBoids();
+    initParticles();
   }
 
   resize();
-  initBoids();
-  ctx.fillStyle = "rgba(5, 11, 20, 1)";
+  initParticles();
+  ctx.fillStyle = "rgba(0, 0, 0, 1)";
   ctx.fillRect(0, 0, width, height);
 
   window.addEventListener("resize", onResize, { passive: true });
